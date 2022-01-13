@@ -1,10 +1,8 @@
 // TODO
 /**
  * 
- * Add menu
- * Randomize walker stats
  * Add self collision detection // Conditional
- * Set hunger based on size
+ * make speed stat actual walker speed
  * Add food items
  * Add hunting/gathering
  * 
@@ -12,34 +10,50 @@
  */
 
 
-
-let counter = 0;
-
 // World Props 
-let tick = 200;
+let tick;
 
 // Walker Props
 let walker;
-let born = false;
-let dead = false;
-let speed = 2;
-let length = 24;
-let endurance = 20;
+let born;
+let dead;
+let speed;
+let length;
+let endurance;
+
+let minLength = 12;
+let maxLength = 48;
+
+let minEndurance = 10;
+let maxEndurance = 50;
 
 function setup() {
     createCanvas(300, 200);
     frameRate(60);
 
-    walker = new Walker();
+    // Force reset frame counter
+    frameCount = 0;
+
+    // World Props 
+    tick = 200;
+
+    // Walker Props
+    walker      = new Walker();
+    born        = false;
+    dead        = false;
+    speed       = 2;
+    length      = randomIntFromInterval(minLength, maxLength);
+    endurance   = randomIntFromInterval(minEndurance, maxEndurance);
+
 }
 
 function draw() {
+    // End sim on death
     if (dead) {
         return false;
     }
 
-    counter++;
-
+    // Wait for walker to be full length before starting dying process
     if (born) {
         if( Math.random() < walker.energy/100) {
             walker.live();
@@ -48,11 +62,13 @@ function draw() {
         walker.live();
     }
 
-    displayStats();
-
-    if (counter > length) {
+    // Check if walker is full length (born)
+    if (frameCount > length) {
         born = true;
     }
+
+    // Display stats after movement
+    displayStats();
 }
 
 class Walker {
@@ -99,12 +115,11 @@ class Walker {
     }
 
     display() {
-        // stroke(0);
         strokeWeight(2);
         noErase();
         point(this.x, this.y);
 
-        if (counter >= length) {
+        if (frameCount >= length) {
             var x = this.pos[length - 1][0];
             var y = this.pos[length - 1][1];
             erase();
@@ -113,13 +128,24 @@ class Walker {
     }
 
     updateHunger() {
-        if (counter % tick == 0 && this.hunger < 100) {
-            this.hunger++;
+
+        // Convert length range to 0 - 2 and convert to float
+        var hungerChange    = ( ( length - minLength ) / (maxLength - minLength) ) * (2 - 0) + 0;
+        hungerChange        = parseFloat(hungerChange.toFixed(2))
+
+        if (frameCount % tick == 0 && this.hunger < 100) {
+            this.hunger += hungerChange;
+            this.hunger = parseFloat(this.hunger.toFixed(2));
+
+            // ensure hunger is 100 max
+            if (this.hunger > 100) {
+                this.hunger = 100;
+            }
         }
     }
 
     updateEnergy() {
-        if (counter % tick == 0 && this.energy > 0) {
+        if (frameCount % tick == 0 && this.energy > 0) {
             var percentage  = (100 - endurance) / 100;
             var fatigue     = this.hunger * percentage;
 
@@ -154,8 +180,20 @@ function displayStats() {
     posY = String(walker.y).padStart(3, '0');
 
     document.getElementById('position').textContent = `${posX}, ${posY}`;
-    document.getElementById('lifespan').textContent = counter;
+    document.getElementById('lifespan').textContent = frameCount;
 
     document.getElementById('hunger').textContent = walker.hunger;
     document.getElementById('energy').textContent = walker.energy;
+}
+
+function playSim() {
+    loop();
+}
+
+function pauseSim() {
+    noLoop();
+}
+
+function resetSim() {
+    setup();
 }
