@@ -1,14 +1,17 @@
 // TODO
 /**
  * 
- * Add self collision detection // Conditional
+ * Add directional bias, more likely to go in set direction
  * make speed stat actual walker speed
  * Add food items
  * Add hunting/gathering
  * 
- * 
+ * Add stress,depression based on hunger and proximity to other snakes
  */
 
+// Globals
+
+var organic = false;
 
 // World Props 
 let tick;
@@ -29,7 +32,7 @@ let maxEndurance = 50;
 
 function setup() {
     createCanvas(300, 200);
-    frameRate(60);
+    frameRate(30);
 
     // Force reset frame counter
     frameCount = 0;
@@ -95,14 +98,21 @@ class Walker {
         // if x matches go y, if y matches go x
 
         for (let i = 0; i < speed; i++) {
-            if (choice == 0) {
-                (this.x < width) ? this.x++ : false;
-            } else if (choice == 1) {
-                (this.x > 0) ? this.x-- : false;
-            } else if (choice == 2) {
-                (this.y < height) ? this.y++: false;
-            } else {
-                (this.y > 0) ? this.y--: false;
+            switch (choice) {
+                case 0:
+                    this.moveLeft();
+                    break;
+                case 1:
+                    this.moveRight();
+                    break;
+                case 2:
+                    this.moveUp();
+                    break;
+                case 3:
+                    this.moveDown();
+                    break;                
+                default:
+                    break;
             }
         }
 
@@ -111,6 +121,82 @@ class Walker {
         } else {
             this.pos.pop();
             this.pos.unshift([this.x, this.y])
+        }
+    }
+
+    moveLeft() {
+        if (this.x > 0) {
+            if (organic) {
+                this.x--;
+            } else {
+                var x = this.x - 1;
+                if (!checkVal(this.pos, x, 0)) {
+                    this.x--;
+                } else {
+                    if( Math.random() < 50/100) {
+                        this.moveDown();
+                    } else {
+                        this.moveUp();
+                    }
+                }
+            }
+        }
+    }
+
+    moveRight() {
+        if (this.x < width) {
+            if (organic) {
+                this.x++;
+            } else {
+                var x = this.x + 1;
+                if (!checkVal(this.pos, x, 0)) {
+                    this.x++;
+                } else {                    
+                    if( Math.random() < 50/100) {
+                        this.moveDown();
+                    } else {
+                        this.moveUp();
+                    }                
+                }
+            }        
+        }
+    }
+
+    moveUp() {
+        if (this.y < height) {
+            if (organic) {
+                this.y++;
+            } else {
+                var y = this.y + 1;
+                if (!checkVal(this.pos, y, 1)) {
+                    this.y++;
+                } else {
+                    if( Math.random() < 50/100) {
+                        this.moveLeft();
+                    } else {
+                        this.moveRight();
+                    }                
+                }
+            }
+        }
+    }
+
+    moveDown() {
+        if (this.y > 0) {
+            if (organic) {
+                this.y--;
+            } else {
+                var y = this.y - 1;
+                if (!checkVal(this.pos, y, 1)) {
+                    this.y--;
+                } else {
+                    if( Math.random() < 50/100) {
+                        this.moveLeft();
+                    } else {
+                        this.moveRight();
+                    }                
+                }
+            }        
         }
     }
 
@@ -162,6 +248,16 @@ class Walker {
 
 function randomIntFromInterval(min, max) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min)
+}
+
+function checkVal(array, value, axis) {
+    for (const item of array) {
+        if (value === item[axis]) {
+            console.log("hit");
+            return false;
+        } else {
+        }
+    }
 }
 
 function displayStats() {
