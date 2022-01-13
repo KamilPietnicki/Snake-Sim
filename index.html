@@ -1,0 +1,67 @@
+<html>
+
+<head>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.0/lib/p5.js"></script>
+    <script src="script.js"></script>
+</head>
+
+<body>
+    <main>
+        <div class="stats">
+            <p class="spacer">STATUS: <span id="status">ALIVE</span></p>
+            <p>STATS</p>
+            <p>Speed: <span id="speed"></span></p>
+            <p>Length: <span id="length"></span></p>
+            <p class="spacer">Endurance: <span id="endurance"></span></p>
+
+            <p>MOOD</p>
+            <p>Hunger: <span id="hunger">???</span>%</p>
+            <p class="spacer">Energy: <span id="energy">???</span>%</p>
+
+            <p>MISC</p>
+            <p>Position: <span id="position"></span></p>
+            <p>Life span: <span id="lifespan"></span></p>
+
+        </div>
+    </main>
+</body>
+
+<style>
+    * {
+        font-family: 'Share Tech Mono', monospace;
+        font-size: 8px;
+    }
+
+    .stats {
+        display: block;
+        position: absolute;
+
+        top: 50%;
+        left: 10%;
+        transform: translate(-50%, -50%);
+    }
+
+    p {
+        margin: 0;
+        margin-bottom: 2px;
+    }
+
+    .spacer {
+        margin-bottom: 12px;
+    }
+
+    canvas {
+        display: block;
+        position: absolute;
+
+        top: 50%;
+        left: 60%;
+        transform: translate(-50%, -50%);
+        border: 1px solid black;
+    }
+</style>
+
+</html>
