@@ -12,6 +12,7 @@
 // Globals
 
 var organic = false;
+var initDirection = randomIntFromInterval(0, 3);
 
 // World Props 
 let tick;
@@ -32,7 +33,8 @@ let maxEndurance = 50;
 
 function setup() {
     createCanvas(300, 200);
-    frameRate(30);
+    frameRate(60);
+    pixelDensity(4);
 
     // Force reset frame counter
     frameCount = 0;
@@ -76,9 +78,11 @@ function draw() {
 
 class Walker {
     constructor() {
-        this.x   = width/2;
-        this.y   = height/2;
-        this.pos = [];
+        this.x                      = width/2;
+        this.y                      = height/2;
+        this.pos                    = [];
+        this.direction              = initDirection;
+        this.weightedDirections     = [];
 
         this.hunger = 0;
         this.energy = 100;
@@ -92,10 +96,11 @@ class Walker {
     }
 
     step() {
-        var choice = randomIntFromInterval(0, 3);
+        var choice = 0;
 
-        // Before making step, compare generated step to x,y pos in array to avoid collisions 
-        // if x matches go y, if y matches go x
+        if (born) {
+            choice = this.decideDirection();
+        }
 
         for (let i = 0; i < speed; i++) {
             switch (choice) {
@@ -124,14 +129,47 @@ class Walker {
         }
     }
 
+    decideDirection() {
+        var direction;
+
+        // Pick initial direction first
+        if (initDirection) {
+            direction       = initDirection;
+            initDirection   = false;
+
+            return direction;
+        } else {
+            switch (this.direction) {
+                case 0:
+                    this.weightedDirections = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3];
+                    break;
+                case 1:
+                    this.weightedDirections = [0, 0, 1, 1, 1, 1, 2, 2, 3, 3];
+                    break;
+                case 2:
+                    this.weightedDirections = [0, 0, 1, 1, 2, 2, 2, 2, 3, 3];
+                    break;
+                case 3:
+                    this.weightedDirections = [0, 0, 1, 1, 2, 2, 3, 3, 3, 3];
+                    break;                
+                default:
+                    break;
+            }
+
+            return direction = this.weightedDirections[randomIntFromInterval(0, 9)];
+        }
+    }
+
     moveLeft() {
         if (this.x > 0) {
-            if (organic) {
+            if (organic || !born) {
                 this.x--;
+                this.direction = 0;
             } else {
                 var x = this.x - 1;
-                if (!checkVal(this.pos, x, 0)) {
+                if (checkVal(this.pos, x, 0)) {
                     this.x--;
+                    this.direction = 0;
                 } else {
                     if( Math.random() < 50/100) {
                         this.moveDown();
@@ -147,11 +185,13 @@ class Walker {
         if (this.x < width) {
             if (organic) {
                 this.x++;
+                this.direction = 1;
             } else {
                 var x = this.x + 1;
-                if (!checkVal(this.pos, x, 0)) {
+                if (checkVal(this.pos, x, 0)) {
                     this.x++;
-                } else {                    
+                    this.direction = 1;
+                } else {     
                     if( Math.random() < 50/100) {
                         this.moveDown();
                     } else {
@@ -166,10 +206,12 @@ class Walker {
         if (this.y < height) {
             if (organic) {
                 this.y++;
+                this.direction = 2;
             } else {
                 var y = this.y + 1;
-                if (!checkVal(this.pos, y, 1)) {
+                if (checkVal(this.pos, y, 1)) {
                     this.y++;
+                    this.direction = 2;
                 } else {
                     if( Math.random() < 50/100) {
                         this.moveLeft();
@@ -185,10 +227,12 @@ class Walker {
         if (this.y > 0) {
             if (organic) {
                 this.y--;
+                this.direction = 3;
             } else {
                 var y = this.y - 1;
-                if (!checkVal(this.pos, y, 1)) {
+                if (checkVal(this.pos, y, 1)) {
                     this.y--;
+                    this.direction = 3;
                 } else {
                     if( Math.random() < 50/100) {
                         this.moveLeft();
@@ -251,13 +295,27 @@ function randomIntFromInterval(min, max) { // min and max included
 }
 
 function checkVal(array, value, axis) {
-    for (const item of array) {
-        if (value === item[axis]) {
-            console.log("hit");
-            return false;
-        } else {
-        }
+    var miss;
+
+    // for (const item of array) {
+    //     if (value === item[axis]) {
+    //         return false;
+    //     } else {
+    //         miss = true;
+    //     }
+    // }
+
+    console.log(array[0][axis] + " - " + value);
+
+
+    if (value === array[0][axis]) {
+        console.log("hit");
+        return false;
+    } else {
+        miss = true;
     }
+
+    return miss;
 }
 
 function displayStats() {
