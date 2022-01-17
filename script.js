@@ -25,12 +25,16 @@ let dead;
 let speed;
 let length;
 let endurance;
+let curiosity;
 
 let minLength = 12;
 let maxLength = 48;
 
 let minEndurance = 10;
 let maxEndurance = 50;
+
+let minCuriosity = 1;
+let maxCuriosity = 10;
 
 function setup() {
     createCanvas(300, 200);
@@ -50,6 +54,7 @@ function setup() {
     speed       = 2;
     length      = randomIntFromInterval(minLength, maxLength);
     endurance   = randomIntFromInterval(minEndurance, maxEndurance);
+    curiosity   = randomIntFromInterval(minCuriosity, maxCuriosity);
 }
 
 function draw() {
@@ -75,7 +80,7 @@ function draw() {
     // Spawn food
     var food = new Food();
 
-    if( Math.random() < 10/100) {
+    if( Math.random() < 0.1/100) {
         food.display();
     }
 
@@ -141,6 +146,7 @@ class Walker {
 
     decideDirection() {
         var direction;
+        var dirArray = [0, 1, 2, 3];
 
         // Pick initial direction first
         if (initDirection) {
@@ -149,24 +155,13 @@ class Walker {
 
             return direction;
         } else {
-            switch (this.direction) {
-                case 0:
-                    this.weightedDirections = [0, 0, 0, 0, 1, 1, 2, 2, 3, 3];
-                    break;
-                case 1:
-                    this.weightedDirections = [0, 0, 1, 1, 1, 1, 2, 2, 3, 3];
-                    break;
-                case 2:
-                    this.weightedDirections = [0, 0, 1, 1, 2, 2, 2, 2, 3, 3];
-                    break;
-                case 3:
-                    this.weightedDirections = [0, 0, 1, 1, 2, 2, 3, 3, 3, 3];
-                    break;                
-                default:
-                    break;
+            for (let i = 0; i < curiosity; i++) {
+                dirArray.push(this.direction);
+              
             }
 
-            return direction = this.weightedDirections[randomIntFromInterval(0, 9)];
+            this.weightedDirections = dirArray;            
+            return direction = this.weightedDirections[randomIntFromInterval(0, this.weightedDirections.length - 1)];
         }
     }
 
@@ -318,6 +313,16 @@ class Walker {
                     stroke(255);
                     circle(fX, fY, item.size);
                     console.log(`I ate those food: +${item.nutricion} Nutriction`);
+
+                    if (this.hunger < 10) {
+                        this.hunger = 0;
+                    } else {
+                        var percentage  = item.nutricion / 100;
+                        var reduction   = this.hunger * percentage
+                        this.hunger     = this.hunger - reduction;
+                        this.hunger     = parseFloat(this.hunger.toFixed(2));
+                    }
+
                 }
             }
         }
@@ -326,8 +331,8 @@ class Walker {
 
 class Food {
     constructor() {
-        this.x          = randomIntFromInterval(10, 280),
-        this.y          = randomIntFromInterval(10, 180),
+        this.x          = randomIntFromInterval(0, width),
+        this.y          = randomIntFromInterval(0, height),
         this.size       = 1,
         this.nutricion  = randomIntFromInterval(10, 100)
     }
@@ -373,6 +378,8 @@ function displayStats() {2
     document.getElementById('speed').textContent = speed;
     document.getElementById('length').textContent = length;
     document.getElementById('endurance').textContent = endurance;
+    document.getElementById('curiosity').textContent = curiosity;
+
 
     posX = String(walker.x).padStart(3, '0');
     posY = String(walker.y).padStart(3, '0');
