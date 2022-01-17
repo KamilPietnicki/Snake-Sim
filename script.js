@@ -16,6 +16,7 @@ var initDirection = randomIntFromInterval(0, 3);
 
 // World Props 
 let tick;
+let spawnedFood = [];
 
 // Walker Props
 let walker;
@@ -49,7 +50,6 @@ function setup() {
     speed       = 2;
     length      = randomIntFromInterval(minLength, maxLength);
     endurance   = randomIntFromInterval(minEndurance, maxEndurance);
-
 }
 
 function draw() {
@@ -72,9 +72,18 @@ function draw() {
         born = true;
     }
 
+    // Spawn food
+    var food = new Food();
+
+    if( Math.random() < 10/100) {
+        food.display();
+    }
+
     // Display stats after movement
     displayStats();
 }
+
+// Classes
 
 class Walker {
     constructor() {
@@ -91,6 +100,7 @@ class Walker {
     live() {
         this.step();
         this.display();
+        this.checkFood();
         this.updateHunger();
         this.updateEnergy();
     }
@@ -245,6 +255,7 @@ class Walker {
     }
 
     display() {
+        stroke(0);
         strokeWeight(2);
         noErase();
         point(this.x, this.y);
@@ -288,7 +299,49 @@ class Walker {
             this.energy = this.energy.toFixed(2);
         }
     }
+
+    checkFood() {
+        var wX = this.x;
+        var wY = this.y;
+        var fX;
+        var fY;
+
+        var range = 3;
+
+        for (const [i, item] of spawnedFood.entries()) {
+            fX = item.x;
+            fY = item.y;
+
+            if (wX > fX - range && wX < fX + range) {
+                if (wY > fY - range && wY < fY + range) {
+                    spawnedFood.splice(i, 1);
+                    stroke(255);
+                    circle(fX, fY, item.size);
+                    console.log(`I ate those food: +${item.nutricion} Nutriction`);
+                }
+            }
+        }
+    }
 }
+
+class Food {
+    constructor() {
+        this.x          = randomIntFromInterval(10, 280),
+        this.y          = randomIntFromInterval(10, 180),
+        this.size       = 1,
+        this.nutricion  = randomIntFromInterval(10, 100)
+    }
+
+    display() {
+        stroke(0, 255, 0)
+        noErase();
+        circle(this.x, this.y, this.size);
+        spawnedFood.push(this);
+        // console.log(`Food spawn: ${this.x}, ${this.y}, Nutricion: ${this.nutricion}`);
+    }
+}
+
+// Functions
 
 function randomIntFromInterval(min, max) { // min and max included 
     return Math.floor(Math.random() * (max - min + 1) + min)
@@ -297,28 +350,19 @@ function randomIntFromInterval(min, max) { // min and max included
 function checkVal(array, value, axis) {
     var miss;
 
-    // for (const item of array) {
-    //     if (value === item[axis]) {
-    //         return false;
-    //     } else {
-    //         miss = true;
-    //     }
-    // }
-
-    console.log(array[0][axis] + " - " + value);
-
-
-    if (value === array[0][axis]) {
-        console.log("hit");
-        return false;
-    } else {
-        miss = true;
+    for (const item of array) {
+        if (value === item[axis]) {
+            // console.log('hit')
+            // return false;
+        } else {
+            miss = true;
+        }
     }
 
     return miss;
 }
 
-function displayStats() {
+function displayStats() {2
     if (walker.hunger == 100 && walker.energy > 0) {
         document.getElementById('status').textContent = "STARVING";
     } else if (walker.energy == 0) {
