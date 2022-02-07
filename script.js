@@ -1,9 +1,9 @@
 // TODO
 /**
- * 
- * Add directional bias, more likely to go in set direction
+ * Increase world size
+ * Add theme toggle
  * make speed stat actual walker speed
- * Add food items
+ * Add support for multiple walkers
  * Add hunting/gathering
  * 
  * Add stress,depression based on hunger and proximity to other snakes
@@ -14,21 +14,20 @@
 var organic = false;
 var initDirection = randomIntFromInterval(0, 3);
 
+// Colors
+
+let snakeColor  = [14,109,147];
+let foodColor   = [99,159,77];
+
 // World Props 
 let tick;
 let spawnedFood = [];
 
 // Walker Props
 let walker;
-let born;
-let dead;
-let speed;
-let length;
-let endurance;
-let curiosity;
 
-let minLength = 12;
-let maxLength = 48;
+let minSize = 12;
+let maxSize = 48;
 
 let minEndurance = 10;
 let maxEndurance = 50;
@@ -45,26 +44,20 @@ function setup() {
     frameCount = 0;
 
     // World Props 
-    tick = 200;
+    tick = 100;
 
-    // Walker Props
-    walker      = new Walker();
-    born        = false;
-    dead        = false;
-    speed       = 2;
-    length      = randomIntFromInterval(minLength, maxLength);
-    endurance   = randomIntFromInterval(minEndurance, maxEndurance);
-    curiosity   = randomIntFromInterval(minCuriosity, maxCuriosity);
+    // Init walker
+    walker = new Walker();
 }
 
 function draw() {
     // End sim on death
-    if (dead) {
+    if (walker.dead) {
         return false;
     }
 
     // Wait for walker to be full length before starting dying process
-    if (born) {
+    if (walker.born) {
         if( Math.random() < walker.energy/100) {
             walker.live();
         }
@@ -73,8 +66,8 @@ function draw() {
     }
 
     // Check if walker is full length (born)
-    if (frameCount > length) {
-        born = true;
+    if (frameCount > walker.size) {
+        walker.born = true;
     }
 
     // Spawn food
@@ -97,6 +90,14 @@ class Walker {
         this.pos                    = [];
         this.direction              = initDirection;
         this.weightedDirections     = [];
+        
+        this.born   = false;
+        this.dead   = false;
+        
+        this.size       = randomIntFromInterval(minSize, maxSize);
+        this.speed      = 2;
+        this.endurance  = randomIntFromInterval(minEndurance, maxEndurance);
+        this.curiosity  = randomIntFromInterval(minCuriosity, maxCuriosity);
 
         this.hunger = 0;
         this.energy = 100;
@@ -113,11 +114,11 @@ class Walker {
     step() {
         var choice = 0;
 
-        if (born) {
+        if (walker.born) {
             choice = this.decideDirection();
         }
 
-        for (let i = 0; i < speed; i++) {
+        for (let i = 0; i < this.speed; i++) {
             switch (choice) {
                 case 0:
                     this.moveLeft();
@@ -136,7 +137,7 @@ class Walker {
             }
         }
 
-        if (this.pos.length < length) {
+        if (this.pos.length < this.size) {
             this.pos.unshift([this.x, this.y])
         } else {
             this.pos.pop();
@@ -155,7 +156,7 @@ class Walker {
 
             return direction;
         } else {
-            for (let i = 0; i < curiosity; i++) {
+            for (let i = 0; i < this.curiosity; i++) {
                 dirArray.push(this.direction);
               
             }
@@ -167,7 +168,7 @@ class Walker {
 
     moveLeft() {
         if (this.x > 0) {
-            if (organic || !born) {
+            if (organic || !walker.born) {
                 this.x--;
                 this.direction = 0;
             } else {
@@ -250,14 +251,14 @@ class Walker {
     }
 
     display() {
-        stroke(0);
+        stroke(snakeColor[0],snakeColor[1],snakeColor[2]);
         strokeWeight(2);
         noErase();
         point(this.x, this.y);
 
-        if (frameCount >= length) {
-            var x = this.pos[length - 1][0];
-            var y = this.pos[length - 1][1];
+        if (frameCount >= this.size) {
+            var x = this.pos[this.size - 1][0];
+            var y = this.pos[this.size - 1][1];
             erase();
             point(x, y);
         }
@@ -266,7 +267,7 @@ class Walker {
     updateHunger() {
 
         // Convert length range to 0 - 2 and convert to float
-        var hungerChange    = ( ( length - minLength ) / (maxLength - minLength) ) * (2 - 0) + 0;
+        var hungerChange    = ( ( this.size - minSize ) / (maxSize - minSize) ) * (2 - 0) + 0;
         hungerChange        = parseFloat(hungerChange.toFixed(2))
 
         if (frameCount % tick == 0 && this.hunger < 100) {
@@ -282,10 +283,10 @@ class Walker {
 
     updateEnergy() {
         if (frameCount % tick == 0 && this.energy > 0) {
-            var percentage  = (100 - endurance) / 100;
+            var percentage  = (100 - this.endurance) / 100;
             var fatigue     = this.hunger * percentage;
 
-            if (this.energy > endurance) {
+            if (this.energy > this.endurance) {
                 this.energy = 100 - fatigue.toFixed(2);
             } else {
                 this.energy--;
@@ -338,7 +339,7 @@ class Food {
     }
 
     display() {
-        stroke(0, 255, 0)
+        stroke(foodColor[0], foodColor[1], foodColor[2])
         noErase();
         circle(this.x, this.y, this.size);
         spawnedFood.push(this);
@@ -372,13 +373,13 @@ function displayStats() {2
         document.getElementById('status').textContent = "STARVING";
     } else if (walker.energy == 0) {
         document.getElementById('status').textContent = "DEAD";
-        dead = true;
+        walker.dead = true;
     }
 
-    document.getElementById('speed').textContent = speed;
-    document.getElementById('length').textContent = length;
-    document.getElementById('endurance').textContent = endurance;
-    document.getElementById('curiosity').textContent = curiosity;
+    document.getElementById('speed').textContent = walker.speed;
+    document.getElementById('length').textContent = walker.size;
+    document.getElementById('endurance').textContent = walker.endurance;
+    document.getElementById('curiosity').textContent = walker.curiosity;
 
 
     posX = String(walker.x).padStart(3, '0');
