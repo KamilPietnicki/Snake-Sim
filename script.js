@@ -36,7 +36,8 @@ let minCuriosity = 1;
 let maxCuriosity = 10;
 
 function setup() {
-    createCanvas(300, 200);
+    console.log();
+    createCanvas(document.body.offsetWidth/2, document.body.offsetHeight/2);
     frameRate(60);
     pixelDensity(4);
 
@@ -71,9 +72,8 @@ function draw() {
     }
 
     // Spawn food
-    var food = new Food();
-
     if( Math.random() < 0.1/100) {
+        var food = new Food();
         food.display();
     }
 

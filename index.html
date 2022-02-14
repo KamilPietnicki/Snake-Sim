@@ -40,7 +40,7 @@
 <style>
     * {
         font-family: 'Share Tech Mono', monospace;
-        font-size: 8px;
+        font-size: 2vh;
     }
     
     body, html, canvas {
@@ -53,18 +53,22 @@
         position: absolute;
 
         top: 50%;
-        left: 10%;
-        transform: translate(-50%, -50%);
+        left: 4vh;
+        transform: translateY(-50%);
+
+        width: 300px;
+
+        z-index: 100;
     }
 
     p {
         margin: 0;
-        margin-bottom: 2px;
+        margin-bottom: 0.5vh;
         color: white;
     }
 
     .spacer {
-        margin-bottom: 12px;
+        margin-bottom: 4vh;
     }
 
     canvas {
@@ -72,7 +76,7 @@
         position: absolute;
 
         top: 50%;
-        left: 60%;
+        left: 50%;
         transform: translate(-50%, -50%);
         border: 1px solid black;
     }
