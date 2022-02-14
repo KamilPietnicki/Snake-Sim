@@ -11,12 +11,6 @@
 <body>
     <main>
 
-        <div class="menu">
-            <button onclick="playSim()">PLAY</button>
-            <button onclick="pauseSim()">PAUSE</button>
-            <button onclick="resetSim()">RESET</button>
-        </div>
-
         <div class="stats">
             <p class="spacer">STATUS: <span id="status">ALIVE</span></p>
             <p>STATS</p>
@@ -33,6 +27,12 @@
             <p>MISC</p>
             <p>Position: <span id="position"></span></p>
             <p>Life span: <span id="lifespan"></span></p>
+
+            <div class="menu">
+                <button onclick="playSim()">PLAY</button>
+                <button onclick="pauseSim()">PAUSE</button>
+                <button onclick="resetSim()">RESET</button>
+            </div>
         </div>
     </main>
 </body>
@@ -56,9 +56,26 @@
         left: 4vh;
         transform: translateY(-50%);
 
-        width: 300px;
+        width: auto;
 
         z-index: 100;
+    }
+
+    .menu {
+        display: block;
+        position: absolute;
+
+        width: 360px;
+        margin-top: 4vh;
+        z-index: 100;
+    }
+
+    button {
+        border-radius: 0;
+        border: none;
+
+        padding: 1vh;
+
     }
 
     p {
